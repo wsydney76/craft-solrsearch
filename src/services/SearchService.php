@@ -48,6 +48,7 @@ class SearchService extends SolrService
 
     public function updateEntry(Entry $entry)
     {
+
         if (ElementHelper::isDraftOrRevision($entry)) {
             return;
         }
@@ -62,6 +63,16 @@ class SearchService extends SolrService
         $this->addDoc($doc, true);
 
         Craft::info("Indexed {$entry->id}: ", SolrSearch::LOG_CATEGORY);
+
+
+    }
+
+    public function deleteEntry(Entry $entry) {
+        if (ElementHelper::isDraftOrRevision($entry)) {
+            return;
+        }
+        $this->deleteDoc($entry->id);
+        return;
     }
 
     public function getSolrDocForEntry(Entry $entry)

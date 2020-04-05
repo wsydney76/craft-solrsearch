@@ -21,6 +21,7 @@ use craft\i18n\PhpMessageSource;
 use craft\services\Utilities;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\View;
+use wsydney76\solrsearch\models\SettingsModel;
 use wsydney76\solrsearch\services\SearchService as SearchService;
 use wsydney76\solrsearch\services\SolrService as SolrService;
 use wsydney76\solrsearch\utilities\SolrUtility;
@@ -50,6 +51,8 @@ class SolrSearch extends Plugin
      */
     public static $services;
 
+    public $hasCpSettings = true;
+
     // Public Methods
     // =========================================================================
 
@@ -58,7 +61,7 @@ class SolrSearch extends Plugin
      */
     public function __construct($id, $parent = null, array $config = [])
     {
-        Craft::setAlias('@modules/search', $this->getBasePath());
+        Craft::setAlias('@solrsearch', $this->getBasePath());
         $this->controllerNamespace = 'wsydney76\solrsearch\controllers';
 
         // Translation category
@@ -68,7 +71,7 @@ class SolrSearch extends Plugin
             $i18n->translations[$id] = [
                 'class' => PhpMessageSource::class,
                 'sourceLanguage' => 'en-US',
-                'basePath' => '@modules/search/translations',
+                'basePath' => '@solrsearch/translations',
                 'forceTranslation' => true,
                 'allowOverrides' => true,
             ];
@@ -90,6 +93,24 @@ class SolrSearch extends Plugin
             /** @var Entry $entry */
             $entry = $event->sender;
             $this->search->updateEntry($entry);
+        }
+        );
+
+        Event::on(
+            Entry::class,
+            Entry::EVENT_AFTER_RESTORE, function(Event $event) {
+            /** @var Entry $entry */
+            $entry = $event->sender;
+            $this->search->updateEntry($entry);
+        }
+        );
+
+        Event::on(
+            Entry::class,
+            Entry::EVENT_AFTER_DELETE, function(Event $event) {
+            /** @var Entry $entry */
+            $entry = $event->sender;
+            $this->search->deleteEntry($entry);
         }
         );
 
@@ -139,6 +160,20 @@ class SolrSearch extends Plugin
             __METHOD__
         );
     }
+
+    protected function createSettingsModel()
+    {
+        return new SettingsModel();
+    }
+
+    protected function settingsHtml()
+    {
+        return Craft::$app->getView()->renderTemplate('solrsearch/settings', [
+            'settings' => $this->getSettings(),
+            'config' => Craft::$app->getConfig()->getConfigFromFile('solrsearch'),
+        ]);
+    }
+
 
     // Protected Methods
     // =========================================================================

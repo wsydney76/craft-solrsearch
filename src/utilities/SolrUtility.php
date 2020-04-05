@@ -28,4 +28,9 @@ class SolrUtility extends Utility
     {
         return Craft::$app->view->renderTemplate('solrsearch/solr_utility.twig');
     }
+
+    public static function iconPath()
+    {
+        return Craft::parseEnv('@solrsearch/icon-mask.svg');
+    }
 }

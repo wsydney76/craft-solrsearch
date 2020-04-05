@@ -31,7 +31,12 @@ class SearchController extends Controller
     // Public Methods
     // =========================================================================
 
-    public function actionUpdateAll()
+    /**
+     * Create new index records for all relevant entries
+     *
+     * @return int
+     */
+    public function actionUpdateAll(): int
     {
         if (!$this->confirm('Update index?')) {
             return ExitCode::OK;
@@ -57,7 +62,12 @@ class SearchController extends Controller
         return ExitCode::OK;
     }
 
-    public function actionDeleteAll()
+    /**
+     * Delete all index records
+     *
+     * @return int
+     */
+    public function actionDeleteAll(): int
     {
         if (!$this->confirm('Delete index?')) {
             return ExitCode::OK;

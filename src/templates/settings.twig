@@ -1,0 +1,15 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.autosuggestField({
+    first: true,
+    label: "Solr Base Url",
+    name: 'solrBaseUrl',
+    required: true,
+    value: settings.solrBaseUrl,
+    suggestEnvVars: true,
+    suggestAliases: true,
+    instructions: 'This typically looks like http://localhost:8989/solr/REPLACEWITHCORENAME',
+    warning: config.solrBaseUrl is defined ? 'This is already set in solrsearch.php and cannot be altered here'|t('solrsearch'),
+    errors: settings.errors('solrBaseUrl')
+}) }}
+

@@ -16,6 +16,8 @@ use craft\helpers\Json;
 use GuzzleHttp\Client;
 use wsydney76\solrsearch\jobs\SolrCommandJob;
 use wsydney76\solrsearch\models\SearchParamsModel;
+use wsydney76\solrsearch\SolrSearch;
+use yii\base\Exception;
 use yii\web\BadRequestHttpException;
 
 /**
@@ -39,8 +41,12 @@ class SolrService extends Component
      * @inheritDoc
      */
     public function init() {
-        $this->_queryUrl = Craft::$app->config->general->solrSearch['queryUrl'];
-        $this->_updateUrl = Craft::$app->config->general->solrSearch['updateUrl'];
+        $baseUrl = Craft::parseEnv(SolrSearch::getInstance()->getSettings()->solrBaseUrl);
+        if (!$baseUrl) {
+            throw new Exception('Solr Base URL not set in config');
+        }
+        $this->_queryUrl = $baseUrl . '/select';
+        $this->_updateUrl = $baseUrl . '/update';
         parent::init();
     }
 

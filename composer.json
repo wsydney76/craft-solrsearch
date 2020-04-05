@@ -30,9 +30,9 @@
     }
   },
   "extra": {
-    "name": "solrsearch",
+    "name": "Solr Search",
     "handle": "solrsearch",
-    "hasCpSettings": false,
+    "hasCpSettings": true,
     "hasCpSection": false,
     "changelogUrl": "https://raw.githubusercontent.com/wsydney76/solrsearch/master/CHANGELOG.md",
     "class": "wsydney76\\solrsearch\\SolrSearch"
