@@ -60,14 +60,11 @@ class SearchService extends SolrService
         }
 
         if ($entry->status != 'live') {
-            $this->deleteDoc($entry->id);
+            $this->deleteDoc($this->_getKey($entry));
             return;
         }
 
         $doc = $this->getSolrDocForEntry($entry);
-        if (!$doc) {
-            return;
-        }
 
         $this->addDoc($doc, false);
 
@@ -80,7 +77,7 @@ class SearchService extends SolrService
         if (ElementHelper::isDraftOrRevision($entry)) {
             return;
         }
-        $this->deleteDoc($entry->id);
+        $this->deleteDoc($this->_getKey($entry));
         return;
     }
 
@@ -100,7 +97,9 @@ class SearchService extends SolrService
         if ($event->cancel) {
             return false;
         }
-        return $event->doc;
+        $doc = $event->doc;
+        $doc['key'] = $this->_getKey($entry);
+        return $doc;
     }
 
     public function updateAll()
@@ -156,8 +155,8 @@ class SearchService extends SolrService
             $highlights = $result['highlighting'];
             $i = 0;
             foreach ($rc['docs'] as $doc) {
-                if (array_key_exists($doc['id'], $highlights)) {
-                    $rc['docs'][$i]['highlighting'] = $highlights[$doc['id']];
+                if (array_key_exists($doc['key'], $highlights)) {
+                    $rc['docs'][$i]['highlighting'] = $highlights[$doc['key']];
                     $i++;
                 }
             }
@@ -183,5 +182,10 @@ class SearchService extends SolrService
         }
 
         return $rc;
+    }
+
+    protected function _getKey(Entry $entry)
+    {
+        return "{$entry->id}_{$entry->site->handle}";
     }
 }

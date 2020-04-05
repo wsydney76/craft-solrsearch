@@ -70,6 +70,13 @@ class SolrService extends Component
         return Json::decodeIfJson($response->getBody()->getContents());
     }
 
+    /**
+     * @param $cmd
+     * @param bool $async
+     * @param bool $commit
+     * @param string $description
+     * @return bool|\Psr\Http\Message\ResponseInterface
+     */
     public function command($cmd, $async = false, $commit = true, $description = 'Execution Solr Command')
     {
         $client = $this->_getClient();
@@ -81,14 +88,13 @@ class SolrService extends Component
                 'description' => $description,
                 'url' => $url,
                 'commit' => $commit]));
-        } else {
-            if ($commit) {
-                $url .= '?commit=true';
-            }
-            $client->request('POST', $url, ['json' => $cmd]);
+            return false;
         }
 
-        return true;
+        if ($commit) {
+            $url .= '?commit=true';
+        }
+        return $client->request('POST', $url, ['json' => $cmd]);
     }
 
     public function addDoc($doc, $async = true, $commit = true)
@@ -96,9 +102,9 @@ class SolrService extends Component
         $this->command(['add' => ['doc' => $doc]], $async, $commit, 'Updating Solr Index');
     }
 
-    public function deleteDoc($id)
+    public function deleteDoc($key)
     {
-        $this->command(['delete' => ['query' => "id:{$id}"]]);
+        $this->command(['delete' => ['query' => "key:{$key}"]]);
     }
 
     public function deleteAll()

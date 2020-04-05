@@ -6,6 +6,7 @@
 
 * Solr is installed
 * A Solr core is created and configured for your project, especially `schema.xml`
+* The schema must contain a field 'key' with type string. This key is handled internally. 
 
 ### Configure the Solr Base Url
 
@@ -207,6 +208,8 @@ $doc = [
 ];
 ````
 
+The doc must not contain a field called `key`. This is used internally as a unique key.
+
 Example: 
 
 ````
@@ -274,7 +277,7 @@ related elements are eager loaded or not (when called if a single entry is saved
 
 ## Multi Site
 
-The plugin has no specific functionality for handling multi site content.
+The plugin has no specific functionality for handling multi site content besides setting a unique `key` value.
 
 The events will always be fired for all sites.
 
@@ -293,3 +296,22 @@ What you can do in your project:
 ./craft solrsearch/search/delete-all
 ./craft solrsearch/search/update-all
 ````
+
+## Raw Solr Commands
+
+Raw update commands can be executed via the `SolrService::command`  method.
+
+The signature is 
+
+`command($cmd, $async = false, $commit = true, $description = 'Execution Solr Command')`
+
+where
+
+* $cmd is the command to execute, either as string or array that can be converted to a valid
+Solr json command
+* $async = true pushes a background job
+* $commit = false does not perform a commit. You can call `SolrService::commit` when finished.
+* $description = Description for the background job, that will be displayd in queue manager.
+
+Returns null if $async = true, else returns http response as instance of `GuzzleHttp\Psr7\Response`.
+You can extract the Solr response with `\craft\helpers\Json::decodeIfJson($returnValue->getBody()->getContents())`
