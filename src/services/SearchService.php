@@ -15,6 +15,7 @@ use craft\elements\Entry;
 use craft\helpers\ElementHelper;
 use wsydney76\solrsearch\events\AfterIndexElementEvent;
 use wsydney76\solrsearch\events\GetAllEntriesForSolrSearchEvent;
+use wsydney76\solrsearch\events\GetSolrDocForEntryEvent;
 use wsydney76\solrsearch\jobs\SolrBatchUpdateJob;
 use wsydney76\solrsearch\models\SearchParamsModel;
 use wsydney76\solrsearch\SolrSearch;
@@ -31,6 +32,7 @@ class SearchService extends SolrService
 
     const EVENT_AFTER_INDEX_ELEMENT = 'afterIndexElement';
     const EVENT_GET_ALL_ENTRIES_FOR_SOLR_SEARCH = 'getAllEntriesForSolrSearch';
+    const EVENT_GET_SOLR_DOC_FOR_ENTRY = 'getSolrDocForEntry';
 
     // Public Methods
     // =========================================================================
@@ -46,6 +48,10 @@ class SearchService extends SolrService
         return $format ? $this->formatResult($result) : $result;
     }
 
+    /**
+     * @param Entry $entry
+     * @throws Exception
+     */
     public function updateEntry(Entry $entry)
     {
 
@@ -59,8 +65,11 @@ class SearchService extends SolrService
         }
 
         $doc = $this->getSolrDocForEntry($entry);
+        if (!$doc) {
+            return;
+        }
 
-        $this->addDoc($doc, true);
+        $this->addDoc($doc, false);
 
         Craft::info("Indexed {$entry->id}: ", SolrSearch::LOG_CATEGORY);
 
@@ -75,9 +84,23 @@ class SearchService extends SolrService
         return;
     }
 
+    /**
+     * @param Entry $entry
+     * @return array|bool
+     * @throws Exception
+     */
     public function getSolrDocForEntry(Entry $entry)
     {
-        return $entry->solrDoc;
+        if (! $this->hasEventHandlers(self::EVENT_GET_SOLR_DOC_FOR_ENTRY)) {
+            throw new Exception('No event handler configured for getting solr doc');
+        }
+
+        $event = new GetSolrDocForEntryEvent(['entry' => $entry]);
+        $this->trigger(self::EVENT_GET_SOLR_DOC_FOR_ENTRY, $event);
+        if ($event->cancel) {
+            return false;
+        }
+        return $event->doc;
     }
 
     public function updateAll()
@@ -86,6 +109,9 @@ class SearchService extends SolrService
         Craft::$app->queue->push(new SolrBatchUpdateJob());
     }
 
+    /**
+     * @throws Exception
+     */
     public function performUpdateAll()
     {
 
@@ -104,6 +130,9 @@ class SearchService extends SolrService
         foreach ($entries as $entry) {
 
             $doc = $this->getSolrDocForEntry($entry);
+            if (! $doc) {
+                continue;
+            }
             $i++;
             $this->addDoc($doc, false, false);
             if ($this->hasEventHandlers(self::EVENT_AFTER_INDEX_ELEMENT)) {

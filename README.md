@@ -36,7 +36,7 @@ Example:
 
 namespace modules\main\models;
 
-class SearchParamsModel extends \wsydney76\solrsearch\models\SearchParamsModel
+class MySearchParamsModel extends \wsydney76\solrsearch\models\SearchParamsModel
 {
 
     public $facet = 'on';
@@ -70,7 +70,7 @@ Example:
 
 ````
 {% set q = craft.app.request.getParam('q') %}
-{% set searchParamsModel = create({class:'modules\\main\\models\\SearchParamsModel', q:q}) %}
+{% set searchParamsModel = create({class:'modules\\main\\models\\MySearchParamsModel', q:q}) %}
 {% set results = craft.solrsearch.search(searchParamsModel) %}
 ````
 
@@ -191,10 +191,9 @@ Example:
 ]
 ````
 
-### Create a behavior for updating an entries record 
+### Create the Solr doc for an entry
 
-The plugin retrieves the data to be indexed by calling a `getSolrDoc()` method on an entry.
-This means there has to be a behavior class attached that implements this method and returns 
+The plugin uses an event to retrieve the data to be indexed. The event returns 
 an array that can be passed to the Solr `add` command. It has to match the fields specified
  in Solr's `schema.xml` and may look like
  
@@ -207,6 +206,46 @@ $doc = [
     'url' => $entry->url,
 ];
 ````
+
+Example: 
+
+````
+use wsydney76\solrsearch\events\GetSolrDocForEntryEvent;
+use wsydney76\solrsearch\services\SearchService;
+
+
+Event::on(
+    SearchService::class,
+    SearchService::EVENT_GET_SOLR_DOC_FOR_ENTRY, function(GetSolrDocForEntryEvent $event) {
+
+    /** @var Entry $entry */
+    $entry = $event->entry;
+
+    if (... do not index this entry)) {
+        $event->cancel = true;
+        return;
+    }
+
+    // Return the Solr doc, using a method that fits best for your project
+    $entry->attachBehavior('solrBehavior', SolrSearchEntryBehavior::class);
+    $event->doc = $entry->getSolrDoc();
+    if (!$event->doc) {
+        $event->cancel = true;
+    }
+}
+);
+````
+
+The entry passed by the event may or may not have eager loaded related elements (see below);
+
+### Events handled by the plugin
+
+The Plugins listens to the following events:
+
+* `EVENT_AFTER_SAVE` (adds / deletes the solr record depending on an entries status)
+* `EVENT_AFTER_DELETE`
+* `EVENT_AFTER_RESTORE`
+
 
 ### Specify the entries to be used for 'Update All'
 
@@ -230,8 +269,23 @@ if (Craft::$app->plugins->isPluginEnabled('solrsearch')) {
 }
 ````
 
-Eager loading related elements and matrix field should be used for better performance, the behavior method has to be aware that
+Eager loading related elements and matrix field should be used for better performance, the getDoc event has to be aware that
 related elements are eager loaded or not (when called if a single entry is saved.)
+
+## Multi Site
+
+The plugin has no specific functionality for handling multi site content.
+
+The events will always be fired for all sites.
+
+So if you save an entry that belongs to three sites, three events will be fired, referencing the entry for that 
+specific site.
+
+What you can do in your project:
+
+* Define a Solr field for the site handle
+* Set the field value when returning the Solr Doc for entry
+* Add a filter query parameter to your search, e.g. `fq:'site:en'`
 
 ## CLI commands    
 
