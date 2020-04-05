@@ -1,0 +1,40 @@
+{
+  "name": "wsydney76/solrsearch",
+  "description": "Integrates Solr search enging",
+  "type": "craft-plugin",
+  "version": "1.0",
+  "keywords": [
+    "craft",
+    "cms",
+    "craftcms",
+    "craft-plugin",
+    "solrsearch"
+  ],
+  "support": {
+    "docs": "https://github.com/wsydney76/solrsearch/blob/master/README.md",
+    "issues": "https://github.com/wsydney76/solrsearch/issues"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "wsydney76",
+      "homepage": "https://github.com/wsydney76"
+    }
+  ],
+  "require": {
+    "craftcms/cms": "^3.4.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "wsydney76\\solrsearch\\": "src/"
+    }
+  },
+  "extra": {
+    "name": "solrsearch",
+    "handle": "solrsearch",
+    "hasCpSettings": false,
+    "hasCpSection": false,
+    "changelogUrl": "https://raw.githubusercontent.com/wsydney76/solrsearch/master/CHANGELOG.md",
+    "class": "wsydney76\\solrsearch\\SolrSearch"
+  }
+}
