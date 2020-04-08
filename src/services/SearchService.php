@@ -11,11 +11,12 @@
 namespace wsydney76\solrsearch\services;
 
 use Craft;
+use craft\base\ElementInterface;
 use craft\elements\Entry;
 use craft\helpers\ElementHelper;
 use wsydney76\solrsearch\events\AfterIndexElementEvent;
-use wsydney76\solrsearch\events\GetAllEntriesForSolrSearchEvent;
-use wsydney76\solrsearch\events\GetSolrDocForEntryEvent;
+use wsydney76\solrsearch\events\GetAllElementsForSolrSearchEvent;
+use wsydney76\solrsearch\events\GetSolrDocForElementEvent;
 use wsydney76\solrsearch\jobs\SolrBatchUpdateJob;
 use wsydney76\solrsearch\models\SearchParamsModel;
 use wsydney76\solrsearch\SolrSearch;
@@ -31,8 +32,8 @@ class SearchService extends SolrService
 {
 
     const EVENT_AFTER_INDEX_ELEMENT = 'afterIndexElement';
-    const EVENT_GET_ALL_ENTRIES_FOR_SOLR_SEARCH = 'getAllEntriesForSolrSearch';
-    const EVENT_GET_SOLR_DOC_FOR_ENTRY = 'getSolrDocForEntry';
+    const EVENT_GET_ALL_ELEMENTS_FOR_SOLR_SEARCH = 'getAllElementsForSolrSearch';
+    const EVENT_GET_SOLR_DOC_FOR_ELEMENT = 'getSolrDocForElement';
 
     // Public Methods
     // =========================================================================
@@ -49,51 +50,56 @@ class SearchService extends SolrService
     }
 
     /**
-     * @param Entry $entry
+     * @param Entry $element
      * @throws Exception
      */
-    public function updateEntry(Entry $entry)
+    public function updateElement(ElementInterface $element)
     {
 
-        if (ElementHelper::isDraftOrRevision($entry)) {
+        if ($element instanceof Entry && ElementHelper::isDraftOrRevision($element)) {
             return;
         }
 
-        if ($entry->status != 'live') {
-            $this->deleteDoc($this->_getKey($entry));
+        if ($element->status != 'live') {
+            $this->deleteDoc($this->_getKey($element));
             return;
         }
 
-        $doc = $this->getSolrDocForEntry($entry);
+        $doc = $this->getSolrDocForElement($element);
+
+        if(!$doc) {
+            return;
+        }
 
         $this->addDoc($doc, false);
 
-        Craft::info("Indexed {$entry->id}: ", SolrSearch::LOG_CATEGORY);
+        Craft::info("Indexed {$element->id}: ", SolrSearch::LOG_CATEGORY);
 
 
     }
 
-    public function deleteEntry(Entry $entry) {
-        if (ElementHelper::isDraftOrRevision($entry)) {
+    public function deleteElement(ElementInterface $element) {
+        if ($element instanceof  Entry && ElementHelper::isDraftOrRevision($element)) {
             return;
         }
-        $this->deleteDoc($this->_getKey($entry));
+        $this->deleteDoc($this->_getKey($element));
         return;
     }
 
     /**
-     * @param Entry $entry
+     * @param ElementInterface $entry
      * @return array|bool
      * @throws Exception
      */
-    public function getSolrDocForEntry(Entry $entry)
+    public function getSolrDocForElement(ElementInterface $entry)
     {
-        if (! $this->hasEventHandlers(self::EVENT_GET_SOLR_DOC_FOR_ENTRY)) {
+        if (! $this->hasEventHandlers(self::EVENT_GET_SOLR_DOC_FOR_ELEMENT)) {
             throw new Exception('No event handler configured for getting solr doc');
         }
 
-        $event = new GetSolrDocForEntryEvent(['entry' => $entry]);
-        $this->trigger(self::EVENT_GET_SOLR_DOC_FOR_ENTRY, $event);
+        $event = new GetSolrDocForElementEvent(['element' => $entry]);
+        $this->trigger(self::EVENT_GET_SOLR_DOC_FOR_ELEMENT, $event);
+
         if ($event->cancel) {
             return false;
         }
@@ -114,21 +120,21 @@ class SearchService extends SolrService
     public function performUpdateAll()
     {
 
-        if (!$this->hasEventHandlers(self::EVENT_GET_ALL_ENTRIES_FOR_SOLR_SEARCH)) {
+        if (!$this->hasEventHandlers(self::EVENT_GET_ALL_ELEMENTS_FOR_SOLR_SEARCH)) {
             throw new Exception('No event handler specified for defining entries to be indexed');
         }
 
-        $event = new GetAllEntriesForSolrSearchEvent();
-        $this->trigger(self::EVENT_GET_ALL_ENTRIES_FOR_SOLR_SEARCH, $event);
+        $event = new GetAllElementsForSolrSearchEvent();
+        $this->trigger(self::EVENT_GET_ALL_ELEMENTS_FOR_SOLR_SEARCH, $event);
 
-        $entries = $event->entries;
+        $elements = $event->elements;
 
-        $c = count($entries);
+        $c = count($elements);
         $i = 0;
 
-        foreach ($entries as $entry) {
+        foreach ($elements as $element) {
 
-            $doc = $this->getSolrDocForEntry($entry);
+            $doc = $this->getSolrDocForElement($element);
             if (! $doc) {
                 continue;
             }
@@ -184,7 +190,7 @@ class SearchService extends SolrService
         return $rc;
     }
 
-    protected function _getKey(Entry $entry)
+    protected function _getKey(ElementInterface $entry): string
     {
         return "{$entry->id}_{$entry->site->handle}";
     }

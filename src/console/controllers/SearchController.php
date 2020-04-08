@@ -51,12 +51,9 @@ class SearchController extends Controller
         };
 
         $service->on(SearchService::EVENT_AFTER_INDEX_ELEMENT, $callback);
-        try {
+
             SolrSearch::$services->search->performUpdateAll();
-        } catch (Exception $e) {
-            $this->stderr($e->getMessage() . PHP_EOL);
-            return ExitCode::UNAVAILABLE;
-        }
+
         $service->off(SearchService::EVENT_AFTER_INDEX_ELEMENT, $callback);
 
         return ExitCode::OK;

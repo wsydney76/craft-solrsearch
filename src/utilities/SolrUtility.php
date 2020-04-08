@@ -4,6 +4,7 @@ namespace wsydney76\solrsearch\utilities;
 
 use Craft;
 use craft\base\Utility;
+use wsydney76\solrsearch\SolrSearch;
 
 class SolrUtility extends Utility
 {
@@ -26,7 +27,8 @@ class SolrUtility extends Utility
      */
     public static function contentHtml(): string
     {
-        return Craft::$app->view->renderTemplate('solrsearch/solr_utility.twig');
+        $settings = SolrSearch::getInstance()->getSettings();
+        return Craft::$app->view->renderTemplate('solrsearch/solr_utility.twig', ['settings' => $settings]);
     }
 
     public static function iconPath()

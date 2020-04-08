@@ -11,9 +11,11 @@
 namespace wsydney76\solrsearch;
 
 use Craft;
+use craft\base\Element;
 use craft\base\Plugin;
 use craft\console\Application as ConsoleApplication;
 use craft\elements\Entry;
+use craft\commerce\elements\Product;
 use craft\events\ModelEvent;
 use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterTemplateRootsEvent;
@@ -88,11 +90,11 @@ class SolrSearch extends Plugin
         static::setInstance($this);
 
         Event::on(
-            Entry::class,
-            Entry::EVENT_AFTER_SAVE, function(ModelEvent $event) {
+            Element::class,
+            Element::EVENT_AFTER_SAVE, function(ModelEvent $event) {
             /** @var Entry $entry */
             $entry = $event->sender;
-            $this->search->updateEntry($entry);
+            $this->search->updateElement($entry);
         }
         );
 
@@ -101,18 +103,20 @@ class SolrSearch extends Plugin
             Entry::EVENT_AFTER_RESTORE, function(Event $event) {
             /** @var Entry $entry */
             $entry = $event->sender;
-            $this->search->updateEntry($entry);
+            $this->search->updateElement($entry);
         }
         );
 
         Event::on(
-            Entry::class,
-            Entry::EVENT_AFTER_DELETE, function(Event $event) {
+            Element::class,
+            Element::EVENT_AFTER_DELETE, function(Event $event) {
             /** @var Entry $entry */
             $entry = $event->sender;
-            $this->search->deleteEntry($entry);
+            $this->search->deleteElement($entry);
         }
         );
+
+
 
         Event::on(
             Utilities::class,

@@ -30,6 +30,8 @@ return [
 This model defines the search parameters used to query Solr. 
 It should specify the default parameters, the dynamic parameters can be set when creating an instance.
 
+The fl parameter (fields to be retrieved) must contain the `key` field, if formatting is enabled (see below).
+
 Example:
 
 ````
@@ -192,7 +194,7 @@ Example:
 ]
 ````
 
-### Create the Solr doc for an entry
+### Create the Solr doc for an element
 
 The plugin uses an event to retrieve the data to be indexed. The event returns 
 an array that can be passed to the Solr `add` command. It has to match the fields specified
@@ -213,16 +215,16 @@ The doc must not contain a field called `key`. This is used internally as a uniq
 Example: 
 
 ````
-use wsydney76\solrsearch\events\GetSolrDocForEntryEvent;
+use wsydney76\solrsearch\events\GetSolrDocForElementEvent;
 use wsydney76\solrsearch\services\SearchService;
 
 
 Event::on(
     SearchService::class,
-    SearchService::EVENT_GET_SOLR_DOC_FOR_ENTRY, function(GetSolrDocForEntryEvent $event) {
+    SearchService::EVENT_GET_SOLR_DOC_FOR_ENTRY, function(GetSolrDocForElementEvent $event) {
 
-    /** @var Entry $entry */
-    $entry = $event->entry;
+    
+    $element = $event->element;
 
     if (... do not index this entry)) {
         $event->cancel = true;
@@ -230,8 +232,8 @@ Event::on(
     }
 
     // Return the Solr doc, using a method that fits best for your project
-    $entry->attachBehavior('solrBehavior', SolrSearchEntryBehavior::class);
-    $event->doc = $entry->getSolrDoc();
+    $element->attachBehavior('solrBehavior', SolrSearchEntryBehavior::class);
+    $event->doc = $element->getSolrDoc();
     if (!$event->doc) {
         $event->cancel = true;
     }
@@ -243,20 +245,20 @@ The entry passed by the event may or may not have eager loaded related elements 
 
 ### Events handled by the plugin
 
-The Plugins listens to the following events:
+The Plugins listens to the following events for Entry/Product element types:
 
 * `EVENT_AFTER_SAVE` (adds / deletes the solr record depending on an entries status)
 * `EVENT_AFTER_DELETE`
-* `EVENT_AFTER_RESTORE`
+* `EVENT_AFTER_RESTORE` (Entry only)
 
 
-### Specify the entries to be used for 'Update All'
+### Specify the elements to be used for 'Update All'
 
-The plugin uses an event to let the project specify the entries to be indexed when 'Update all' is called
+The plugin uses an event to let the project specify the elements to be indexed when 'Update all' is called
 either via the Solr Search Utility in the Control Panel or via the CLI command.
 
 ````
-use wsydney76\solrsearch\events\GetAllEntriesForSolrSearchEvent;
+use wsydney76\solrsearch\events\GetAllElementsForSolrSearchEvent;
 use wsydney76\solrsearch\services\SearchService;
 
 ...
@@ -264,9 +266,9 @@ use wsydney76\solrsearch\services\SearchService;
 if (Craft::$app->plugins->isPluginEnabled('solrsearch')) {
     Event::on(
         SearchService::class,
-        SearchService::EVENT_GET_ALL_ENTRIES_FOR_SOLR_SEARCH, function(GetAllEntriesForSolrSearchEvent $event) {
+        SearchService::EVENT_GET_ALL_ENTRIES_FOR_SOLR_SEARCH, function(GetAllElementsForSolrSearchEvent $event) {
         // Get entries, eg. via a service
-        $event->entries = $this->content->getEntriesForSolrSearch();
+        $event->elements = $this->content->getEntriesForSolrSearch();
     }
     );
 }

@@ -40,6 +40,19 @@ class SearchController extends Controller
     // =========================================================================
 
 
+    public function actionReload()
+    {
+        $this->requirePermission('utility:solr');
+        try {
+            SolrSearch::$services->solr->reload();
+        } catch (Exception $e) {
+            Craft::$app->session->setError('Error connecting to Search Service: ' . $e->getMessage());
+            return $this->redirectToPostedUrl();
+        }
+        Craft::$app->session->setNotice('Core reloaded');
+        return $this->redirectToPostedUrl();
+    }
+
     /**
      * @return \yii\web\Response
      * @throws BadRequestHttpException
@@ -47,7 +60,7 @@ class SearchController extends Controller
      */
     public function actionDeleteAll()
     {
-        $this->requireAdmin();
+        $this->requirePermission('utility:solr');
 
         try {
             SolrSearch::$services->search->deleteAll();
@@ -66,7 +79,7 @@ class SearchController extends Controller
      */
     public function actionUpdateAll()
     {
-        $this->requireAdmin();
+        $this->requirePermission('utility:solr');
 
         SolrSearch::$services->search->updateAll();
         Craft::$app->session->setNotice('Batch job started');

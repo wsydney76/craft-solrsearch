@@ -8,8 +8,19 @@
     value: settings.solrBaseUrl,
     suggestEnvVars: true,
     suggestAliases: true,
-    instructions: 'This typically looks like http://localhost:8989/solr/REPLACEWITHCORENAME',
+    instructions: 'This typically looks like http://localhost:8989/solr',
     warning: config.solrBaseUrl is defined ? 'This is already set in solrsearch.php and cannot be altered here'|t('solrsearch'),
     errors: settings.errors('solrBaseUrl')
 }) }}
 
+{{ forms.autosuggestField({
+    first: true,
+    label: "Solr Core",
+    name: 'solrCore',
+    required: true,
+    value: settings.solrCore,
+    suggestEnvVars: true,
+    suggestAliases: true,
+    warning: config.solrCore is defined ? 'This is already set in solrsearch.php and cannot be altered here'|t('solrsearch'),
+    errors: settings.errors('solrCore')
+}) }}
