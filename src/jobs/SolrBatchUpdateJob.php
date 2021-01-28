@@ -13,6 +13,7 @@ namespace wsydney76\solrsearch\jobs;
 use Craft;
 use craft\queue\BaseJob;
 use Exception;
+use putyourlightson\logtofile\LogToFile;
 use wsydney76\solrsearch\events\AfterIndexElementEvent;
 use wsydney76\solrsearch\SolrSearch;
 use wsydney76\solrsearch\services\SearchService;
@@ -44,7 +45,7 @@ class SolrBatchUpdateJob extends BaseJob
         try {
             SolrSearch::$services->search->performUpdateAll();
         } catch (Exception $e) {
-            Craft::error($e->getMessage(), SolrSearch::LOG_CATEGORY);
+            LogToFile::error($e->getMessage(), SolrSearch::LOG_CATEGORY);
         }
         $service->off(SearchService::EVENT_AFTER_INDEX_ELEMENT, $callback);
     }

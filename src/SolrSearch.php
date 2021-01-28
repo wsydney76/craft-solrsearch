@@ -44,7 +44,7 @@ use yii\base\Module;
 class SolrSearch extends Plugin
 {
 
-    const LOG_CATEGORY = 'SolrSearch';
+    const LOG_CATEGORY = 'solrsearch';
     // Static Properties
     // =========================================================================
 

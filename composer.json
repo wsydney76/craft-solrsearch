@@ -2,7 +2,7 @@
   "name": "wsydney76/solrsearch",
   "description": "Integrates Solr search enging",
   "type": "craft-plugin",
-  "version": "1.0",
+  "version": "1.1",
   "keywords": [
     "craft",
     "cms",
@@ -22,7 +22,8 @@
     }
   ],
   "require": {
-    "craftcms/cms": "^3.4.0"
+    "craftcms/cms": "^3.4.0",
+    "putyourlightson/craft-log-to-file": "^1.0.0"
   },
   "autoload": {
     "psr-4": {

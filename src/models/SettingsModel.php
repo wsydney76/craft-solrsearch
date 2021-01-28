@@ -8,8 +8,8 @@ use yii\base\Exception;
 
 class SettingsModel extends Model
 {
-    public $solrBaseUrl;
-    public $solrCore;
+    public $solrBaseUrl = '@SOLR_BASE_URL';
+    public $solrCore = '@SOLR_CORE';
 
     public function rules()
     {

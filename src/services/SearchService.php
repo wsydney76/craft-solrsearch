@@ -12,14 +12,11 @@ namespace wsydney76\solrsearch\services;
 
 use Craft;
 use craft\base\ElementInterface;
-use craft\elements\Asset;
 use craft\elements\Category;
 use craft\elements\Entry;
-use craft\elements\GlobalSet;
-use craft\elements\MatrixBlock;
-use craft\elements\Tag;
-use craft\elements\User;
 use craft\helpers\ElementHelper;
+use craft\commerce\elements\Product;
+use putyourlightson\logtofile\LogToFile;
 use wsydney76\solrsearch\events\AfterIndexElementEvent;
 use wsydney76\solrsearch\events\GetAllElementsForSolrSearchEvent;
 use wsydney76\solrsearch\events\GetSolrDocForElementEvent;
@@ -61,11 +58,9 @@ class SearchService extends SolrService
      */
     public function updateElement(ElementInterface $element)
     {
-        if ($element instanceof GlobalSet ||
-            $element instanceof Tag ||
-            $element instanceof User ||
-            $element instanceof MatrixBlock ||
-            $element instanceof Asset) {
+        if (!($element instanceof Entry ||
+            $element instanceof Category ||
+            $element instanceof Product )) {
             return;
         }
 
@@ -91,7 +86,7 @@ class SearchService extends SolrService
 
         $this->addDoc($doc, false);
 
-        Craft::info("Indexed {$element->id}: ", SolrSearch::LOG_CATEGORY);
+        LogToFile::log("Indexed {$element->id}: ", SolrSearch::LOG_CATEGORY, 'index');
     }
 
     public function deleteElement(ElementInterface $element)
@@ -111,7 +106,8 @@ class SearchService extends SolrService
     public function getSolrDocForElement(ElementInterface $entry)
     {
         if (!$this->hasEventHandlers(self::EVENT_GET_SOLR_DOC_FOR_ELEMENT)) {
-            throw new Exception('No event handler configured for getting solr doc');
+            return [];
+            //throw new Exception('No event handler configured for getting solr doc');
         }
 
         $event = new GetSolrDocForElementEvent(['element' => $entry]);
@@ -162,8 +158,10 @@ class SearchService extends SolrService
             if ($this->hasEventHandlers(self::EVENT_AFTER_INDEX_ELEMENT)) {
                 $this->trigger(self::EVENT_AFTER_INDEX_ELEMENT, new AfterIndexElementEvent(['count' => $c, 'current' => $i]));
             }
+            LogToFile::log("Preparing ID {$element->id}", SolrSearch::LOG_CATEGORY, 'indexAll');
         }
         $this->command($docs);
+        LogToFile::log("Update Command run", SolrSearch::LOG_CATEGORY, 'indexAll');
     }
 
     protected function formatResult($result)
