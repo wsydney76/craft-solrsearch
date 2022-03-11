@@ -1,0 +1,46 @@
+{# @var settings \wsydney76\solrsearch\models\SettingsModel #}
+
+<table id="settings" class="data">
+    <tr>
+        <th>Solr Base Url:</th>
+        <td>{{ settings.baseUrl }}</td>
+    </tr>
+    <tr>
+        <th>Solr Core:</th>
+        <td>{{ settings.core }}</td>
+    </tr>
+    <tr>
+        <th style="vertical-align: top">Schema:</th>
+        <td>
+            <a class="go" href="{{ settings.schemaUrl }}">schema.xml</a>
+            <form style="margin-top: 12px" method="post" accept-charset="UTF-8">
+                {{ csrfInput() }}
+                {{ actionInput("solrsearch/search/reload") }}
+                <input type="submit" class="btn submit" value="Reload">
+            </form>
+
+        </td>
+    </tr>
+    <tr>
+        <th>Delete all</th>
+        <td>
+            <form method="post" accept-charset="UTF-8">
+                {{ csrfInput() }}
+                {{ actionInput("solrsearch/search/delete-all") }}
+                <input type="submit" class="btn submit" value="Delete">
+            </form>
+        </td>
+    </tr>
+    <tr>
+        <th>Update All</th>
+        <td>
+            <form method="post" accept-charset="UTF-8">
+                {{ csrfInput() }}
+                {{ actionInput("solrsearch/search/update-all") }}
+                <input type="submit" class="btn submit" value="Update">
+            </form>
+        </td>
+    </tr>
+</table>
+
+
