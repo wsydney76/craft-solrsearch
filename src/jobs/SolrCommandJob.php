@@ -39,7 +39,7 @@ class SolrCommandJob extends BaseJob
     /**
      * @inheritdoc
      */
-    public function execute($queue)
+    public function execute($queue): void
     {
         $client = Craft::createGuzzleClient();
         $url = $this->url;
@@ -59,7 +59,7 @@ class SolrCommandJob extends BaseJob
     /**
      * @inheritdoc
      */
-    protected function defaultDescription(): string
+    protected function defaultDescription(): ?string
     {
         return 'Executing Solr Command';
     }

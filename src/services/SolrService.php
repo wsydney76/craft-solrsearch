@@ -41,7 +41,7 @@ class SolrService extends Component
     /**
      * @throws Exception
      */
-    public function init()
+    public function init(): void
     {
         /** @var SettingsModel $settings */
         $settings = SolrSearch::getInstance()->getSettings();
