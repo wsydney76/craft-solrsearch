@@ -53,7 +53,7 @@ class SolrSearch extends Plugin
      */
     public static $services;
 
-    public $hasCpSettings = true;
+    public bool $hasCpSettings = true;
 
     // Public Methods
     // =========================================================================
@@ -165,12 +165,12 @@ class SolrSearch extends Plugin
         );
     }
 
-    protected function createSettingsModel()
+    protected function createSettingsModel(): ?\craft\base\Model
     {
         return new SettingsModel();
     }
 
-    protected function settingsHtml()
+    protected function settingsHtml(): ?string
     {
         return Craft::$app->getView()->renderTemplate('solrsearch/settings', [
             'settings' => $this->getSettings(),

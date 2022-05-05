@@ -31,7 +31,7 @@ class SolrUtility extends Utility
         return Craft::$app->view->renderTemplate('solrsearch/solr_utility.twig', ['settings' => $settings]);
     }
 
-    public static function iconPath()
+    public static function iconPath(): ?string
     {
         return Craft::parseEnv('@solrsearch/icon-mask.svg');
     }
