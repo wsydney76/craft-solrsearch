@@ -11,7 +11,7 @@ class SettingsModel extends Model
     public $solrBaseUrl = '@SOLR_BASE_URL';
     public $solrCore = '@SOLR_CORE';
 
-    public function rules()
+    public function rules(): array
     {
         $rules = parent::rules();
         $rules[] = ['solrBaseUrl', 'required'];

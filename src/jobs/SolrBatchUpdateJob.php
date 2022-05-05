@@ -34,7 +34,7 @@ class SolrBatchUpdateJob extends BaseJob
     /**
      * @inheritdoc
      */
-    public function execute($queue)
+    public function execute($queue): void
     {
         $service = SolrSearch::$services->search;
         $callback = function(AfterIndexElementEvent $e) use ($queue) {
@@ -56,7 +56,7 @@ class SolrBatchUpdateJob extends BaseJob
     /**
      * @inheritdoc
      */
-    protected function defaultDescription(): string
+    protected function defaultDescription(): ?string
     {
         return 'Updating full search index';
     }
