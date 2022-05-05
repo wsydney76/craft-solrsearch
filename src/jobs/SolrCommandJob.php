@@ -13,7 +13,6 @@ namespace wsydney76\solrsearch\jobs;
 use Craft;
 use craft\queue\BaseJob;
 use Exception;
-use putyourlightson\logtofile\LogToFile;
 use wsydney76\solrsearch\SolrSearch;
 
 /**
@@ -49,7 +48,7 @@ class SolrCommandJob extends BaseJob
         try {
             $client->request('POST', $url, ['json' => $this->command]);
         } catch (Exception $e) {
-            LogToFile::error($e->getMessage(), SolrSearch::LOG_CATEGORY);
+            Craft::error($e->getMessage(), SolrSearch::LOG_CATEGORY);
         }
     }
 
