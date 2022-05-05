@@ -16,7 +16,6 @@ use craft\elements\Category;
 use craft\elements\Entry;
 use craft\helpers\ElementHelper;
 use craft\commerce\elements\Product;
-use putyourlightson\logtofile\LogToFile;
 use wsydney76\solrsearch\events\AfterIndexElementEvent;
 use wsydney76\solrsearch\events\GetAllElementsForSolrSearchEvent;
 use wsydney76\solrsearch\events\GetSolrDocForElementEvent;
@@ -86,7 +85,7 @@ class SearchService extends SolrService
 
         $this->addDoc($doc, false);
 
-        LogToFile::log("Indexed {$element->id}: ", SolrSearch::LOG_CATEGORY, 'index');
+        Craft::info("Indexed {$element->id}: ", SolrSearch::LOG_CATEGORY, 'index');
     }
 
     public function deleteElement(ElementInterface $element)
@@ -158,10 +157,10 @@ class SearchService extends SolrService
             if ($this->hasEventHandlers(self::EVENT_AFTER_INDEX_ELEMENT)) {
                 $this->trigger(self::EVENT_AFTER_INDEX_ELEMENT, new AfterIndexElementEvent(['count' => $c, 'current' => $i]));
             }
-            LogToFile::log("Preparing ID {$element->id}", SolrSearch::LOG_CATEGORY, 'indexAll');
+            Craft::info("Preparing ID {$element->id}", SolrSearch::LOG_CATEGORY, 'indexAll');
         }
         $this->command($docs);
-        LogToFile::log("Update Command run", SolrSearch::LOG_CATEGORY, 'indexAll');
+        Craft::info("Update Command run", SolrSearch::LOG_CATEGORY, 'indexAll');
     }
 
     protected function formatResult($result)
