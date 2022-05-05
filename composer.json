@@ -2,7 +2,7 @@
   "name": "wsydney76/solrsearch",
   "description": "Integrates Solr search enging",
   "type": "craft-plugin",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "keywords": [
     "craft",
     "cms",
