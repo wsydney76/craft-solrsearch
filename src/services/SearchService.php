@@ -16,6 +16,7 @@ use craft\elements\Category;
 use craft\elements\Entry;
 use craft\helpers\ElementHelper;
 use craft\commerce\elements\Product;
+use craft\helpers\Json;
 use wsydney76\solrsearch\events\AfterIndexElementEvent;
 use wsydney76\solrsearch\events\GetAllElementsForSolrSearchEvent;
 use wsydney76\solrsearch\events\GetSolrDocForElementEvent;
@@ -48,6 +49,11 @@ class SearchService extends SolrService
     public function search(SearchParamsModel $searchParamsModel, $format = true)
     {
         $result = $this->query($searchParamsModel);
+
+		$message = ['q' => $searchParamsModel->q, 'fq' => $searchParamsModel->fq, 'fqs' => $searchParamsModel->fqs, 'numFound' => $result['response']['numFound']];
+
+		SolrSearch::getInstance()->log(Json::encode($message));
+
         return $format ? $this->formatResult($result) : $result;
     }
 
@@ -166,10 +172,12 @@ class SearchService extends SolrService
     protected function formatResult($result)
     {
         // \Craft::dd($result);
+		// TODO: Check responseHeader
         $rc = [
             'rcode' => 'OK',
             'recordcount' => $result['response']['numFound'],
             'time' => $result['responseHeader']['QTime'],
+            // 'time' => 0,
             'docs' => $result['response']['docs']
         ];
 
