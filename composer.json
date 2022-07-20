@@ -1,8 +1,8 @@
 {
   "name": "wsydney76/solrsearch",
-  "description": "Integrates Solr search enging",
+  "description": "Integrates Solr search engine",
   "type": "craft-plugin",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "keywords": [
     "craft",
     "cms",

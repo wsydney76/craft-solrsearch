@@ -50,7 +50,7 @@ class SearchService extends SolrService
     {
         $result = $this->query($searchParamsModel);
 
-		$message = ['q' => $searchParamsModel->q, 'fq' => $searchParamsModel->fq, 'numFound' => $result['response']['numFound']];
+		$message = ['q' => $searchParamsModel->q, 'fq' => $searchParamsModel->fq, 'fqs' => $searchParamsModel->fqs, 'numFound' => $result['response']['numFound']];
 
 		SolrSearch::getInstance()->log(Json::encode($message));
 
