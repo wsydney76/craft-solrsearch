@@ -20,9 +20,13 @@ use craft\events\ModelEvent;
 use craft\events\RegisterComponentTypesEvent;
 use craft\events\RegisterTemplateRootsEvent;
 use craft\i18n\PhpMessageSource;
+use craft\log\MonologTarget;
 use craft\services\Utilities;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\View;
+use Monolog\Formatter\LineFormatter;
+
+use Psr\Log\LogLevel;
 use wsydney76\solrsearch\models\SettingsModel;
 use wsydney76\solrsearch\services\SearchService as SearchService;
 use wsydney76\solrsearch\services\SolrService as SolrService;
@@ -30,6 +34,7 @@ use wsydney76\solrsearch\utilities\SolrUtility;
 use wsydney76\solrsearch\variables\SearchModuleVariable;
 use yii\base\Event;
 use yii\base\Module;
+use yii\log\Logger;
 
 /**
  * Class SearchModule
@@ -155,6 +160,8 @@ class SolrSearch extends Plugin
             }
         );
 
+	    $this->_registerLogTarget();
+
         Craft::info(
             Craft::t(
                 'solrsearch',
@@ -164,6 +171,29 @@ class SolrSearch extends Plugin
             __METHOD__
         );
     }
+
+	private function _registerLogTarget(): void
+	{
+		Craft::getLogger()->dispatcher->targets[] = new MonologTarget([
+			'name' => 'solrsearch',
+			'categories' => ['solrsearch'],
+			'level' => LogLevel::INFO,
+			'logContext' => false,
+			'allowLineBreaks' => false,
+			'formatter' => new LineFormatter(
+				format: "%datetime% %message%\n",
+				dateFormat: 'Y-m-d H:i:s',
+			)
+		]);
+	}
+
+	/**
+	 * Logs a message to our custom log target.
+	 */
+	public function log(string $message, int $type = Logger::LEVEL_INFO): void
+	{
+		Craft::getLogger()->log($message, $type, 'solrsearch');
+	}
 
     protected function createSettingsModel(): ?\craft\base\Model
     {

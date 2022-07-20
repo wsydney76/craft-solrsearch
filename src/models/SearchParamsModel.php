@@ -3,6 +3,7 @@
 namespace wsydney76\solrsearch\models;
 
 use craft\base\Model;
+use function implode;
 
 class SearchParamsModel extends Model
 {
@@ -28,13 +29,33 @@ class SearchParamsModel extends Model
     public $spellcheckBuild = 'false';
     public $spellcheckCollate = 'false';
     public $spellcheckExtendedResults = 'false';
+	public $start = 0;
     public $version = '2.2';
     public $wt = 'json';
+
+	public $fqs = [];
+
+	public function addFq($key, $value): void
+	{
+		if ($value == '') {
+			return;
+		}
+		$this->fqs[] = "$key: \"$value\"";
+	}
+
+	public function joinFqs()
+	{
+		if (!$this->fqs) {
+			return '';
+		}
+		return implode(' AND ', $this->fqs);
+	}
 
     public function getParams()
     {
         return [
             'debugQuery' => $this->debugQuery,
+			'defType' => 'edismax',
             //'f.titel.qf' => $this->fTitleQf,
             // 'f.wer.qf' => $this->fWerQf,
             'facet' => $this->facet,
@@ -42,7 +63,7 @@ class SearchParamsModel extends Model
             'facet.limit' => $this->facetLimit,
             'facet.sort' => $this->facetSort,
             'fl' => $this->fl,
-            'fq' => $this->fq,
+			'fq' => $this->fqs ? $this->joinFqs() : $this->fq,
             'hl' => $this->hl,
             'hl.fl' => $this->hlFl,
             'hl.simple.post' => $this->hlSimplePost,
@@ -54,6 +75,7 @@ class SearchParamsModel extends Model
             'qt' => $this->qt,
             'rows' => $this->rows,
             'sort' => $this->sort,
+	        'start' => $this->start,
             'spellcheck' => $this->spellcheck,
             'spellcheck.build' => $this->spellcheckBuild,
             'spellcheck.collate' => $this->spellcheckCollate,
